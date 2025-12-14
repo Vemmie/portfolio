@@ -1,0 +1,9 @@
+{
+  "name": "portfolio-contact-lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda function to send portfolio contact emails via Nodemailer.",
+  "main": "index.js",
+  "dependencies": {
+    "nodemailer": "^6.9.13"
+  }
+}
