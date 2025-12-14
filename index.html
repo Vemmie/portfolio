@@ -337,23 +337,35 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              // 2. CRITICAL ADDITION: Pass the X-API-Key header
+              // 3. CRITICAL: This header enforces security and quota limits
               'X-API-Key': API_KEY, 
             },
             // The body is sent as a JSON string to match what Lambda expects
             body: JSON.stringify(data), 
           });
+          
+          // CRITICAL: Ensure we read the body only if the status code is NOT 204 (No Content)
+          const responseBody = await response.json().catch(() => ({})); 
 
           if (response.ok) {
-            // Success response from Lambda (HTTP 200)
-            statusMessage.textContent = 'Your message has been sent successfully! Thank a you.';
+            // SUCCESS: Status is 200-299.
+            // This happens when API Key is correct AND Lambda successfully processed the mail.
+            statusMessage.textContent = 'Your message has been sent successfully! Thank you.';
             statusMessage.className = 'my-3 text-center text-success';
             form.reset(); // Clear the form
           } else {
-            // Error response from API Gateway or Lambda. 
-            // If the API Key is wrong or missing, this will likely be a 403 Forbidden error.
-            const errorData = await response.json();
-            statusMessage.textContent = `Submission failed: ${errorData.message || 'Server error.'}`;
+            // FAILURE: Status is 4xx or 5xx.
+            let message = responseBody.message || responseBody.Message || 'Server error.';
+
+            if (response.status === 403) {
+                // If API Key is wrong or missing, API Gateway returns a 403.
+                message = "Submission blocked. The API Key is invalid or missing. (403)";
+            } else if (response.status === 429) {
+                // If the rate limit is hit.
+                message = "Submission failed: Too many requests. Please try again later. (429)";
+            }
+            
+            statusMessage.textContent = `Submission failed: ${message}`;
             statusMessage.className = 'my-3 text-center text-danger';
           }
         } catch (error) {
