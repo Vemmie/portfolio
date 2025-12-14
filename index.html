@@ -239,7 +239,7 @@
               <h3>Send Me A Message</h3>
               <p>I look forward to discussing my project experience and technical abilities.</p>
 
-              <form action="forms/contact.php" method="post" class="php-email-form">
+              <form id="contactForm">
                 <div class="row gy-4">
 
                   <div class="col-md-6">
@@ -259,9 +259,7 @@
                   </div>
 
                   <div class="col-12 text-center">
-                    <div class="loading">Loading</div>
-                    <div class="error-message"></div>
-                    <div class="sent-message">Your message has been sent. Thank you!</div>
+                    <div id="formStatusMessage" class="my-3 text-center"></div>
 
                     <button type="submit" class="btn">Send Message</button>
                   </div>
@@ -307,6 +305,68 @@
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
 
   <script src="assets/js/main.js"></script>
+
+  <script>
+    const API_KEY = "mB3wOft1Tm64k8r7q3gov6ncu05NKP9097sg4rZ3";
+    
+    // UPDATE: Use the Invoke URL without the resource path, as your method is on the root path (/)
+    const LAMBDA_ENDPOINT = "https://cmraxqfm65.execute-api.us-east-2.amazonaws.com/default"; 
+
+    const form = document.getElementById('contactForm');
+    const statusMessage = document.getElementById('formStatusMessage');
+    const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+
+    if (form && submitButton) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Clear previous messages and disable button
+        statusMessage.textContent = 'Sending message...';
+        statusMessage.className = 'my-3 text-center text-info';
+        submitButton.disabled = true;
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+          data[key] = value;
+        }
+
+        try {
+          const response = await fetch(LAMBDA_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              // 2. CRITICAL ADDITION: Pass the X-API-Key header
+              'X-API-Key': API_KEY, 
+            },
+            // The body is sent as a JSON string to match what Lambda expects
+            body: JSON.stringify(data), 
+          });
+
+          if (response.ok) {
+            // Success response from Lambda (HTTP 200)
+            statusMessage.textContent = 'Your message has been sent successfully! Thank a you.';
+            statusMessage.className = 'my-3 text-center text-success';
+            form.reset(); // Clear the form
+          } else {
+            // Error response from API Gateway or Lambda. 
+            // If the API Key is wrong or missing, this will likely be a 403 Forbidden error.
+            const errorData = await response.json();
+            statusMessage.textContent = `Submission failed: ${errorData.message || 'Server error.'}`;
+            statusMessage.className = 'my-3 text-center text-danger';
+          }
+        } catch (error) {
+          // Network or CORS error (often due to wrong endpoint or CORS settings)
+          console.error('Network or fetch error:', error);
+          statusMessage.textContent = 'A network error occurred. Please check your console for details.';
+          statusMessage.className = 'my-3 text-center text-danger';
+        } finally {
+          submitButton.disabled = false; // Re-enable the button
+        }
+      });
+    }
+  </script>
 
 </body>
 
