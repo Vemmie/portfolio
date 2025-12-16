@@ -311,10 +311,8 @@
   <script src="assets/js/main.js"></script>
 
   <script>
-    const API_KEY = "mB3wOft1Tm64k8r7q3gov6ncu05NKP9097sg4rZ3";
-    
     // UPDATE: Use the Invoke URL without the resource path, as your method is on the root path (/)
-    const LAMBDA_ENDPOINT = "https://cmraxqfm65.execute-api.us-east-2.amazonaws.com/default"; 
+    const LAMBDA_ENDPOINT = "https://cmraxqfm65.execute-api.us-east-2.amazonaws.com/default/contact"; 
 
     const form = document.getElementById('contactForm');
     const statusMessage = document.getElementById('formStatusMessage');
@@ -340,9 +338,7 @@
           const response = await fetch(LAMBDA_ENDPOINT, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              // 3. CRITICAL: This header enforces security and quota limits
-              'X-Api-Key': API_KEY, 
+              'Content-Type': 'application/json', 
             },
             // The body is sent as a JSON string to match what Lambda expects
             body: JSON.stringify(data), 

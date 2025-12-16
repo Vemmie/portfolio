@@ -2,14 +2,13 @@
 
 const nodemailer = require('nodemailer');
 
-// --- Environment Variables (Set in AWS Lambda Configuration) ---
-// These are loaded securely by the Lambda runtime
-const SMTP_HOST = process.env.SMTP_HOST; // e.g., smtp.sendgrid.net
+// --- Environment Variables ---
+const SMTP_HOST = process.env.SMTP_HOST; 
 const SMTP_PORT = process.env.SMTP_PORT || 587;
 const SMTP_USER = process.env.SMTP_USER; 
 const SMTP_PASS = process.env.SMTP_PASS;
-const RECEIVING_EMAIL = process.env.RECEIVING_EMAIL; // Your personal/receiving email address
-const SENDER_EMAIL = process.env.SENDER_EMAIL; // An email address you control (e.g., contact@yourdomain.com)
+const RECEIVING_EMAIL = process.env.RECEIVING_EMAIL; 
+const SENDER_EMAIL = process.env.SENDER_EMAIL; 
 
 // Configure the Nodemailer transport object once outside the handler 
 // for efficiency in subsequent calls (Lambda container reuse).
@@ -53,7 +52,7 @@ exports.handler = async (event) => {
 
     const { name, email, subject, message } = body;
 
-    // 2. Server-Side Validation
+    // Server-Side Validation
     if (!name || !email || !subject || !message) {
         return { 
             statusCode: 400, 
@@ -62,7 +61,7 @@ exports.handler = async (event) => {
         };
     }
     
-    // 3. Construct the Email 
+    // Construct the Email 
     const mailOptions = {
         // From: MUST be your controlled SENDER_EMAIL to prevent spoofing
         from: `"${name} (Portfolio)" <${SENDER_EMAIL}>`, 
@@ -82,7 +81,7 @@ exports.handler = async (event) => {
         `
     };
 
-    // 4. Send the email
+    // Sends The Email
     try {
         await transporter.sendMail(mailOptions);
         console.log(`Email sent successfully from ${email}`);
