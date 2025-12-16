@@ -7,3 +7,5 @@ Author: BootstrapMade.com
 License: https://bootstrapmade.com/license/
 
 Icon: Apex Legends
+
+**Backend deployed on AWS API Gateway using Lambda functions**
